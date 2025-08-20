@@ -1,0 +1,22 @@
+{
+  "filters": {
+    "spamKeywords": ["advertisement", "sponsored", "promotion", "sale"],
+    "requiredKeywords": ["truck", "trucking", "freight", "logistics", "transportation", "shipping", "driver"],
+    "blockedDomains": [],
+    "minWordCount": 20
+  },
+  "content": {
+    "maxPostLength": 280,
+    "maxHashtags": 8
+  },
+  "hashtags": [
+    "#trucking",
+    "#logistics",
+    "#transportation",
+    "#freight",
+    "#shipping",
+    "#supplychain",
+    "#truckdriver",
+    "#truckingindustry"
+  ]
+}

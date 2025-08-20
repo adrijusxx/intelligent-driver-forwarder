@@ -1,0 +1,17 @@
+{
+  "logging": {
+    "level": "warn",
+    "dir": "./logs",
+    "maxFiles": 30,
+    "maxSize": "50m"
+  },
+  "scraping": {
+    "timeout": 15000,
+    "maxConcurrent": 3,
+    "requestDelay": 2000
+  },
+  "facebook": {
+    "retryAttempts": 5,
+    "retryDelay": 10000
+  }
+}

@@ -1,0 +1,91 @@
+{
+  "app": {
+    "name": "Trucking News Forwarder",
+    "port": 3000,
+    "timezone": "America/New_York"
+  },
+  "database": {
+    "path": "./data/articles.db",
+    "backupPath": "./data/backups"
+  },
+  "logging": {
+    "level": "info",
+    "dir": "./logs",
+    "maxFiles": 7,
+    "maxSize": "10m"
+  },
+  "facebook": {
+    "apiVersion": "v18.0",
+    "pageId": null,
+    "accessToken": null,
+    "retryAttempts": 3,
+    "retryDelay": 5000
+  },
+  "scraping": {
+    "userAgent": "TruckingNewsBot/1.0",
+    "timeout": 10000,
+    "maxConcurrent": 5,
+    "requestDelay": 1000
+  },
+  "content": {
+    "maxArticlesPerSource": 10,
+    "articleAgeHours": 24,
+    "minEngagementScore": 0.7,
+    "maxPostLength": 280,
+    "maxHashtags": 8
+  },
+  "sources": [
+    {
+      "name": "FreightWaves",
+      "url": "https://www.freightwaves.com/feed",
+      "type": "rss",
+      "enabled": true,
+      "priority": 1
+    },
+    {
+      "name": "Transport Topics",
+      "url": "https://www.ttnews.com/rss.xml",
+      "type": "rss",
+      "enabled": true,
+      "priority": 1
+    },
+    {
+      "name": "Trucking Info",
+      "url": "https://www.truckinginfo.com/rss/news",
+      "type": "rss",
+      "enabled": true,
+      "priority": 2
+    },
+    {
+      "name": "Land Line Magazine",
+      "url": "https://landlinemag.com/feed/",
+      "type": "rss",
+      "enabled": true,
+      "priority": 2
+    }
+  ],
+  "hashtags": [
+    "#trucking",
+    "#logistics",
+    "#transportation",
+    "#freight",
+    "#shipping",
+    "#supplychain",
+    "#truckdriver",
+    "#truckingindustry",
+    "#logistics",
+    "#freightforwarding"
+  ],
+  "filters": {
+    "spamKeywords": ["advertisement", "sponsored", "promotion", "sale", "discount"],
+    "requiredKeywords": ["truck", "trucking", "freight", "logistics", "transportation", "shipping", "driver"],
+    "blockedDomains": [],
+    "minWordCount": 50
+  },
+  "schedule": {
+    "morning": "0 8 * * *",
+    "afternoon": "0 13 * * *",
+    "evening": "0 18 * * *",
+    "enabled": true
+  }
+}
