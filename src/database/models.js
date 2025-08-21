@@ -1,5 +1,4 @@
 const db = require('./db').getDb();
-const logger = require('../utils/logger');
 
 /**
  * Article model for database operations
