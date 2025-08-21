@@ -296,7 +296,6 @@ class RSSFeedScraper {
 
 module.exports = RSSFeedScraper;
 
-const config = require('../utils/config');
 const articleAgeHours = config.get('content.articleAgeHours', 24);
 
 function isRecentArticle(pubDate) {
