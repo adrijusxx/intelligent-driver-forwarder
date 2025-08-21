@@ -295,15 +295,3 @@ class RSSFeedScraper {
 }
 
 module.exports = RSSFeedScraper;
-
-const articleAgeHours = config.get('content.articleAgeHours', 24);
-
-function isRecentArticle(pubDate) {
-  const now = new Date();
-  const published = new Date(pubDate);
-  const ageHours = (now - published) / (1000 * 60 * 60);
-  return ageHours <= articleAgeHours;
-}
-
-// ...when filtering articles...
-const filteredArticles = articles.filter(article => isRecentArticle(article.publishedAt));
