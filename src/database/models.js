@@ -1,4 +1,4 @@
-const { dbAll, dbGet, dbRun } = require('./db');
+const { dbAll, dbGet, dbRun, getDb } = require('./db');
 
 /**
  * Article model for database operations
