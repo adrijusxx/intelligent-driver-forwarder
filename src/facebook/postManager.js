@@ -74,68 +74,13 @@ class PostManager {
   }
 
   /**
-   * Process all posts ready for publishing
-   * @returns {object} Processing results
+   * Process all scheduled posts that are ready to be published
    */
   async processScheduledPosts() {
-    const startTime = Date.now();
-    
     try {
-      const readyPosts = await FacebookPost.getReadyToPost();
-      
-      if (readyPosts.length === 0) {
-        logger.debug('No posts ready for publishing');
-        return {
-          processed: 0,
-          successful: 0,
-          failed: 0,
-          duration: Date.now() - startTime
-        };
-      }
-
-      logger.info('Processing scheduled posts', { count: readyPosts.length });
-
-      const results = {
-        processed: readyPosts.length,
-        successful: 0,
-        failed: 0,
-        posts: []
-      };
-
-      // Process posts sequentially to avoid rate limits
+      const readyPosts = await FacebookPost.getReadyToPost() || [];
+      logger.info('Processing posts', { count: readyPosts.length });
       for (const post of readyPosts) {
-        const result = await this.publishPost(post);
-        
-        if (result.success) {
-          results.successful++;
-        } else {
-          results.failed++;
-        }
-        
-        results.posts.push({
-          id: post.id,
-          title: post.title,
-          success: result.success,
-          facebook_post_id: result.facebook_post_id,
-          error: result.error
-        });
-
-        // Small delay between posts to be nice to Facebook
-        await new Promise(resolve => setTimeout(resolve, 2000));
-      }
-
-      const duration = Date.now() - startTime;
-      results.duration = duration;
-
-      logger.info('Scheduled posts processing completed', results);
-
-      return results;
-
-    } catch (error) {
-      logger.error('Failed to process scheduled posts', error);
-      throw error;
-    }
-  }
 
   /**
    * Update engagement metrics for existing posts
