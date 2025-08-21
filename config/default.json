@@ -14,12 +14,12 @@
     "maxFiles": 7,
     "maxSize": "10m"
   },
-  "facebook": {
-    "apiVersion": "v18.0",
-    "pageId": null,
-    "accessToken": null,
-    "retryAttempts": 3,
-    "retryDelay": 5000
+ "facebook": {
+  "apiVersion": "v18.0",
+  "pageId": "534295833110036",
+  "accessToken": "EAAQrAsA1wosBPCJOaF1OJj6UIYWecKExaQPGHHyaNSDOtMqY4RjkUPtUk7xN2jJqZBIV2PTxGtngto7wnVzxyBKgnlmkUHdG4ZBpZCW7HS27nDDZCPRm5RdMB2WZAg9EH5QxrXKODZA8gaKxJmNq3ZBAFi4FP0l0ykpHnDKHM5uyA51qgIrLGgy8LU8PtD6wWcerUsYvJ7qqxg5wmRXY5SQ6NYOxoXWw7hIhn1161rqZCjO6fAZDZD",
+  "retryAttempts": "3",
+  "retryDelay": "5000"
   },
   "scraping": {
     "userAgent": "TruckingNewsBot/1.0",
@@ -51,7 +51,7 @@
     },
     {
       "name": "Trucking Info",
-      "url": "https://www.truckinginfo.com/rss/news",
+      "url": "https://www.truckinginfo.com/rss",
       "type": "rss",
       "enabled": true,
       "priority": 2
@@ -83,9 +83,9 @@
     "minWordCount": 50
   },
   "schedule": {
-    "morning": "0 8 * * *",
-    "afternoon": "0 13 * * *",
-    "evening": "0 18 * * *",
+  "morning": "*/2 * * * *",
+  "afternoon": "*/4 * * * *",
+  "evening": "*/6 * * * *",
     "enabled": true
   }
 }
