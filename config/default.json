@@ -29,7 +29,7 @@
   },
   "content": {
     "maxArticlesPerSource": 10,
-    "articleAgeHours": 24,
+    "articleAgeHours": 240,
     "minEngagementScore": 0.7,
     "maxPostLength": 280,
     "maxHashtags": 8

@@ -1,15 +1,15 @@
 const RSSParser = require('rss-parser');
 const axios = require('axios');
-const configUtil = require('../utils/config');
+const config = require('../utils/config');
 const logger = require('../utils/logger');
 
 class RSSFeedScraper {
   constructor() {
     this.parser = new RSSParser({
-      timeout: configUtil.get('scraping.timeout', 10000),
+      timeout: config.get('scraping.timeout', 10000),
       maxRedirects: 3,
       headers: {
-        'User-Agent': configUtil.get('scraping.userAgent', 'TruckingNewsBot/1.0')
+        'User-Agent': config.get('scraping.userAgent', 'TruckingNewsBot/1.0')
       }
     });
   }
@@ -28,8 +28,8 @@ class RSSFeedScraper {
       const feed = await this.parser.parseURL(source.url);
       const articles = [];
       
-      const maxArticles = configUtil.get('content.maxArticlesPerSource', 10);
-      const articleAgeHours = configUtil.get('content.articleAgeHours', 24);
+      const maxArticles = config.get('content.maxArticlesPerSource', 10);
+      const articleAgeHours = config.get('content.articleAgeHours', 24);
       const cutoffDate = new Date(Date.now() - articleAgeHours * 60 * 60 * 1000);
       
       for (const item of feed.items.slice(0, maxArticles)) {
@@ -234,7 +234,7 @@ class RSSFeedScraper {
    * @returns {array} Array of all articles from all sources
    */
   async scrapeAllSources() {
-    const sources = configUtil.get('sources', []).filter(source => 
+    const sources = config.get('sources', []).filter(source => 
       source.enabled && source.type === 'rss'
     );
     
@@ -246,8 +246,8 @@ class RSSFeedScraper {
     logger.info('Starting RSS scrape for all sources', { sources: sources.length });
     
     const allArticles = [];
-    const maxConcurrent = configUtil.get('scraping.maxConcurrent', 3);
-    const requestDelay = configUtil.get('scraping.requestDelay', 1000);
+    const maxConcurrent = config.get('scraping.maxConcurrent', 3);
+    const requestDelay = config.get('scraping.requestDelay', 1000);
     
     // Process sources in batches to respect rate limits
     for (let i = 0; i < sources.length; i += maxConcurrent) {
@@ -295,3 +295,13 @@ class RSSFeedScraper {
 }
 
 module.exports = RSSFeedScraper;
+
+function isRecentArticle(pubDate) {
+  const now = new Date();
+  const published = new Date(pubDate);
+  const ageHours = (now - published) / (1000 * 60 * 60);
+  return ageHours <= articleAgeHours;
+}
+
+// ...when filtering articles...
+const filteredArticles = articles.filter(article => isRecentArticle(article.publishedAt));
