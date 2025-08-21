@@ -18,6 +18,8 @@
   "apiVersion": "v18.0",
   "pageId": "534295833110036",
   "accessToken": "EAAQrAsA1wosBPEE71E9gtYhrT1Aa7NfSuO3d42kLJWe8wA8LXWzDzqazl3dbDc3ruvA3XdOfYagDheAjvnRvan2MurqjRl7ayqr7grUo4KgDTEiSIRASZChZAG2BhvsqSgBtag7WuzIXEZBrR12tTzMJwgucVsXI2HSWQ0jewm65lcklFqKkBJ32esEnoZBjGoo7tZCR0ACS6VW26DVjfdPzPzVPenUDlQshGwtTnTaF5rgZDZD",
+  "appId": "1173190721520267",
+  "appSecret": "f90fd5f582a74db3b857396e1b718a63",
   "retryAttempts": "3",
   "retryDelay": "5000"
   },

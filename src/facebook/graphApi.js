@@ -10,6 +10,39 @@ class FacebookGraphAPI {
     this.baseUrl = `https://graph.facebook.com/${this.apiVersion}`;
     this.retryAttempts = configUtil.get('facebook.retryAttempts', 3);
     this.retryDelay = configUtil.get('facebook.retryDelay', 5000);
+    this.appId = configUtil.get('facebook.appId');
+    this.appSecret = configUtil.get('facebook.appSecret');
+  }
+
+  updateAccessToken(newToken) {
+    this.accessToken = newToken;
+    logger.info('Updated Facebook access token');
+  }
+
+  async exchangeToken() {
+    try {
+      const response = await axios({
+        method: 'GET',
+        url: `${this.baseUrl}/oauth/access_token`,
+        params: {
+          grant_type: 'fb_exchange_token',
+          client_id: this.appId,
+          client_secret: this.appSecret,
+          fb_exchange_token: this.accessToken
+        }
+      });
+
+      if (!response.data || !response.data.access_token) {
+        throw new Error('Failed to get new access token from Facebook');
+      }
+
+      return response.data.access_token;
+    } catch (error) {
+      logger.error('Failed to exchange Facebook token', {
+        error: error.response?.data || error.message
+      });
+      throw error;
+    }
   }
 
   /**
