@@ -1,4 +1,4 @@
-const { getDb } = require('./db');
+const { dbAll, dbGet, dbRun } = require('./db');
 
 /**
  * Article model for database operations
@@ -10,7 +10,6 @@ class Article {
    * @returns {object} Created article with ID
    */
   static async create(articleData) {
-    const db = getDb();
     const {
       url,
       title,
@@ -24,7 +23,7 @@ class Article {
     } = articleData;
 
     try {
-      const result = await db.run(
+      const result = await dbRun(
         `INSERT INTO articles (
           url, title, summary, content, source, published_date, 
           image_url, engagement_score, tags
@@ -59,8 +58,7 @@ class Article {
    * @returns {object|null} Article or null if not found
    */
   static async findByUrl(url) {
-    const db = getDb();
-    const article = await db.get('SELECT * FROM articles WHERE url = ?', [url]);
+    const article = await dbGet('SELECT * FROM articles WHERE url = ?', [url]);
     if (article && article.tags) {
       article.tags = JSON.parse(article.tags);
     }
@@ -87,8 +85,7 @@ class Article {
    * @returns {array} Array of articles
    */
   static async getUnprocessed(limit = 10) {
-    const db = getDb();
-    const articles = await db.all(
+    const articles = await dbAll(
       `SELECT * FROM articles 
        WHERE is_processed = 0 AND is_duplicate = 0
        ORDER BY engagement_score DESC, published_date DESC 
@@ -175,7 +172,6 @@ class FacebookPost {
    * @returns {object} Created post with ID
    */
   static async create(postData) {
-    const db = getDb();
     const {
       article_id,
       post_text,
@@ -185,7 +181,7 @@ class FacebookPost {
       status = 'pending'
     } = postData;
 
-    const result = await db.run(
+    const result = await dbRun(
       `INSERT INTO facebook_posts (
         article_id, post_text, scheduled_time, facebook_post_id, 
         post_url, status
