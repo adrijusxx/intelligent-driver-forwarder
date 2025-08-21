@@ -37,16 +37,12 @@ class FacebookGraphAPI {
   async getPageInfo() {
     try {
       const response = await this.makeRequest('GET', `/${this.pageId}`, {
-        fields: 'id,name,access_token'
+        fields: 'id,name,access_token,fan_count,about,website,phone,emails,location'
       });
       return response;
     } catch (error) {
       logger.error('Failed to get page info', { error: error.message });
       throw error;
-    }
-    } catch (error) {
-      logger.error('Facebook credential validation failed', error);
-      return false;
     }
   }
 
@@ -60,7 +56,7 @@ class FacebookGraphAPI {
     
     try {
       logger.info('Creating Facebook post', { 
-        textLength: text.length,
+        textLength: text?.length,
         hasImage: !!image_url,
         hasLink: !!article_url
       });
@@ -302,15 +298,7 @@ class FacebookGraphAPI {
     }
   }
 
-  /**
-   * Get page information
-   * @returns {object} Page information
-   */
-  async getPageInfo() {
-    return await this.makeRequest('GET', `/${this.pageId}`, {
-      fields: 'id,name,fan_count,about,website,phone,emails,location'
-    });
-  }
+
 }
 
 module.exports = FacebookGraphAPI;
