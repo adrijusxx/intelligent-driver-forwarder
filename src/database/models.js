@@ -6,7 +6,14 @@ const { dbAll, dbGet, dbRun, getDb } = require('./db');
 class Article {
   /**
    * Save new article to database
-   * @param {object} articleData - Article data
+   * @param {object} const { dbAll, dbGet, dbRun, getDb } = require('./db');
+const logger = require('../utils/logger');
+
+class FacebookPost {
+  static async create(data) {
+    const result = await dbRun(
+      `INSERT INTO facebook_posts (article_id, content, scheduled_time, processed) 
+       VALUES (?, ?, ?, ?)`,Data - Article data
    * @returns {object} Created article with ID
    */
   static async create(articleData) {
