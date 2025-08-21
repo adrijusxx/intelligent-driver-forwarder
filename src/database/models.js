@@ -1,4 +1,4 @@
-const db = require('./db').getDb();
+const { getDb } = require('./db');
 
 /**
  * Article model for database operations
@@ -10,6 +10,7 @@ class Article {
    * @returns {object} Created article with ID
    */
   static async create(articleData) {
+    const db = getDb();
     const {
       url,
       title,
@@ -58,6 +59,7 @@ class Article {
    * @returns {object|null} Article or null if not found
    */
   static async findByUrl(url) {
+    const db = getDb();
     const article = await db.get('SELECT * FROM articles WHERE url = ?', [url]);
     if (article && article.tags) {
       article.tags = JSON.parse(article.tags);
@@ -71,6 +73,7 @@ class Article {
    * @returns {object|null} Article or null if not found
    */
   static async findById(id) {
+    const db = getDb();
     const article = await db.get('SELECT * FROM articles WHERE id = ?', [id]);
     if (article && article.tags) {
       article.tags = JSON.parse(article.tags);
@@ -84,6 +87,7 @@ class Article {
    * @returns {array} Array of articles
    */
   static async getUnprocessed(limit = 10) {
+    const db = getDb();
     const articles = await db.all(
       `SELECT * FROM articles 
        WHERE is_processed = 0 AND is_duplicate = 0
@@ -106,6 +110,7 @@ class Article {
    * @returns {array} Array of articles
    */
   static async getRecent(hours = 24) {
+    const db = getDb();
     const cutoffDate = new Date(Date.now() - hours * 60 * 60 * 1000).toISOString();
     const articles = await db.all(
       'SELECT * FROM articles WHERE published_date >= ? ORDER BY published_date DESC',
@@ -125,6 +130,7 @@ class Article {
    * @param {number} id - Article ID
    */
   static async markAsProcessed(id) {
+    const db = getDb();
     await db.run(
       'UPDATE articles SET is_processed = 1, updated_at = CURRENT_TIMESTAMP WHERE id = ?',
       [id]
@@ -137,6 +143,7 @@ class Article {
    * @param {number} id - Article ID
    */
   static async markAsDuplicate(id) {
+    const db = getDb();
     await db.run(
       'UPDATE articles SET is_duplicate = 1, updated_at = CURRENT_TIMESTAMP WHERE id = ?',
       [id]
@@ -150,6 +157,7 @@ class Article {
    * @param {number} score - Engagement score
    */
   static async updateEngagementScore(id, score) {
+    const db = getDb();
     await db.run(
       'UPDATE articles SET engagement_score = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?',
       [score, id]
@@ -167,6 +175,7 @@ class FacebookPost {
    * @returns {object} Created post with ID
    */
   static async create(postData) {
+    const db = getDb();
     const {
       article_id,
       post_text,
@@ -195,6 +204,7 @@ class FacebookPost {
    * @param {object} updates - Additional updates
    */
   static async updateStatus(id, status, updates = {}) {
+    const db = getDb();
     const fields = ['status = ?', 'updated_at = CURRENT_TIMESTAMP'];
     const values = [status];
 
@@ -218,6 +228,7 @@ class FacebookPost {
    * @returns {array} Array of pending posts
    */
   static async getPending() {
+    const db = getDb();
     return await db.all(
       `SELECT fp.*, a.title, a.url as article_url, a.image_url 
        FROM facebook_posts fp 
@@ -232,6 +243,7 @@ class FacebookPost {
    * @returns {array} Array of posts ready for publishing
    */
   static async getReadyToPost() {
+    const db = getDb();
     const now = new Date().toISOString();
     return await db.all(
       `SELECT fp.*, a.title, a.url as article_url, a.image_url 
@@ -254,6 +266,7 @@ class ProcessingQueue {
    * @param {number} priority - Priority (1 = highest)
    */
   static async add(article_id, priority = 1) {
+    const db = getDb();
     try {
       const result = await db.run(
         'INSERT INTO processing_queue (article_id, priority) VALUES (?, ?)',
@@ -274,6 +287,7 @@ class ProcessingQueue {
    * @returns {object|null} Queue item or null if empty
    */
   static async getNext() {
+    const db = getDb();
     return await db.get(
       `SELECT pq.*, a.title, a.url 
        FROM processing_queue pq 
@@ -291,6 +305,7 @@ class ProcessingQueue {
    * @param {string} error_message - Error message if failed
    */
   static async updateStatus(id, status, error_message = null) {
+    const db = getDb();
     await db.run(
       `UPDATE processing_queue 
        SET status = ?, error_message = ?, updated_at = CURRENT_TIMESTAMP 
@@ -304,6 +319,7 @@ class ProcessingQueue {
    * @param {number} id - Queue ID
    */
   static async incrementRetry(id) {
+    const db = getDb();
     await db.run(
       `UPDATE processing_queue 
        SET retry_count = retry_count + 1, updated_at = CURRENT_TIMESTAMP 
