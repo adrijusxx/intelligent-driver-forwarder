@@ -49,17 +49,6 @@ function createTables() {
   });
 }
 
-const dbInstance = getDb();
-
-// Example query using the db instance
-dbInstance.all('SELECT * FROM articles', [], (err, rows) => {
-  if (err) {
-    logger.error('Failed to fetch articles', { error: err.message });
-    return;
-  }
-  logger.info('Fetched articles successfully', { count: rows.length });
-});
-
 module.exports = {
   init,
   getDb,
