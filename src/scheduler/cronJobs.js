@@ -9,12 +9,12 @@ const PostManager = require('../facebook/postManager');
 const { Article, ProcessingQueue } = require('../database/models');
 
 class CronJobs {
-  constructor() {
+  constructor(postManager) {
     this.scraper = new RSSFeedScraper();
     this.contentFilter = new ContentFilter();
     this.duplicateDetector = new DuplicateDetector();
     this.postGenerator = new PostGenerator();
-    this.postManager = new PostManager();
+    this.postManager = postManager;
     
     this.jobs = new Map();
     this.isProcessing = false;

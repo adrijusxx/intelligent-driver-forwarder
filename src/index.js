@@ -10,12 +10,14 @@ const logger = require('./utils/logger');
 const db = require('./database/db');
 const CronJobs = require('./scheduler/cronJobs');
 const PostManager = require('./facebook/postManager');
+const FacebookGraphAPI = require('./facebook/graphApi');
 
 class TruckingNewsForwarder {
   constructor() {
     this.app = express();
-    this.cronJobs = new CronJobs();
-    this.postManager = new PostManager();
+    this.graphApi = new FacebookGraphAPI();
+    this.postManager = new PostManager(this.graphApi);
+    this.cronJobs = new CronJobs(this.postManager);
     this.server = null;
   }
 
