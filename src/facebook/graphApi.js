@@ -18,16 +18,32 @@ class FacebookGraphAPI {
    */
   async validateCredentials() {
     try {
+      const pageInfo = await this.getPageInfo();
+      logger.info('Facebook credentials validated', { 
+        pageId: pageInfo.id, 
+        pageName: pageInfo.name 
+      });
+      return true;
+    } catch (error) {
+      logger.error('Facebook credential validation failed', { error: error.message });
+      throw error;
+    }
+  }
+
+  /**
+   * Get Facebook page information
+   * @returns {Promise<Object>} Page information
+   */
+  async getPageInfo() {
+    try {
       const response = await this.makeRequest('GET', `/${this.pageId}`, {
         fields: 'id,name,access_token'
       });
-      
-      logger.info('Facebook credentials validated', { 
-        pageId: response.id, 
-        pageName: response.name 
-      });
-      
-      return true;
+      return response;
+    } catch (error) {
+      logger.error('Failed to get page info', { error: error.message });
+      throw error;
+    }
     } catch (error) {
       logger.error('Facebook credential validation failed', error);
       return false;

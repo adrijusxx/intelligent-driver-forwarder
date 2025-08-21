@@ -52,6 +52,25 @@ class PostManager {
   }
 
   /**
+   * Validate Facebook credentials
+   */
+  async validateCredentials() {
+    try {
+      const pageInfo = await this.graphApi.getPageInfo();
+      logger.info('Facebook credentials validated', {
+        pageId: pageInfo.id,
+        pageName: pageInfo.name
+      });
+      return pageInfo;
+    } catch (error) {
+      logger.error('Facebook credential validation failed', {
+        error: error.message
+      });
+      throw error;
+    }
+  }
+
+  /**
    * Schedule a new post
    * @param {object} article Article data
    * @param {string} postContent Post content
