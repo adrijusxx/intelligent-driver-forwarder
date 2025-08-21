@@ -197,12 +197,23 @@ class Database {
 // Create singleton instance
 const db = new Database();
 
-db.run(
-  `INSERT INTO articles (title, url, published_at, processed) VALUES (?, ?, ?, 0)`,
-  [article.title, article.url, article.publishedAt],
-  function (err) {
-    // ...existing code...
-  }
-);
+function insertArticles(articles) {
+  articles.forEach(article => {
+    db.run(
+      `INSERT INTO articles (title, url, published_at, processed) VALUES (?, ?, ?, 0)`,
+      [article.title, article.url, article.publishedAt],
+      function (err) {
+        if (err) {
+          console.error('Error inserting article:', err);
+        } else {
+          console.log('Inserted article:', article.title);
+        }
+      }
+    );
+  });
+}
 
-module.exports = db;
+module.exports = {
+  insertArticles,
+  // ...other exports...
+};
