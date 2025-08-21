@@ -17,7 +17,7 @@
  "facebook": {
   "apiVersion": "v18.0",
   "pageId": "534295833110036",
-  "accessToken": "EAAQrAsA1wosBPCJOaF1OJj6UIYWecKExaQPGHHyaNSDOtMqY4RjkUPtUk7xN2jJqZBIV2PTxGtngto7wnVzxyBKgnlmkUHdG4ZBpZCW7HS27nDDZCPRm5RdMB2WZAg9EH5QxrXKODZA8gaKxJmNq3ZBAFi4FP0l0ykpHnDKHM5uyA51qgIrLGgy8LU8PtD6wWcerUsYvJ7qqxg5wmRXY5SQ6NYOxoXWw7hIhn1161rqZCjO6fAZDZD",
+  "accessToken": "EAAQrAsA1wosBPEE71E9gtYhrT1Aa7NfSuO3d42kLJWe8wA8LXWzDzqazl3dbDc3ruvA3XdOfYagDheAjvnRvan2MurqjRl7ayqr7grUo4KgDTEiSIRASZChZAG2BhvsqSgBtag7WuzIXEZBrR12tTzMJwgucVsXI2HSWQ0jewm65lcklFqKkBJ32esEnoZBjGoo7tZCR0ACS6VW26DVjfdPzPzVPenUDlQshGwtTnTaF5rgZDZD",
   "retryAttempts": "3",
   "retryDelay": "5000"
   },
