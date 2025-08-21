@@ -49,6 +49,8 @@ function createTables() {
   });
 }
 
+const db = require('./db').getDb();
+
 module.exports = {
   init,
   getDb,
