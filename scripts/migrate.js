@@ -46,6 +46,31 @@ class DatabaseMigrator {
             await db.run('ALTER TABLE facebook_posts ADD COLUMN engagement_metrics TEXT');
           }
         }
+      },
+      {
+        version: 4,
+        description: 'Fix processed column for articles',
+        up: async () => {
+          // Check if processed column exists
+          const tableInfo = await db.all("PRAGMA table_info(articles)");
+          const hasProcessed = tableInfo.some(col => col.name === 'processed');
+          const hasIsProcessed = tableInfo.some(col => col.name === 'is_processed');
+          
+          logger.info('Checking processed column status', { hasProcessed, hasIsProcessed });
+          
+          if (!hasProcessed && hasIsProcessed) {
+            // Add processed column and copy data from is_processed
+            await db.run('ALTER TABLE articles ADD COLUMN processed INTEGER DEFAULT 0');
+            await db.run('UPDATE articles SET processed = is_processed');
+            logger.info('Migrated is_processed to processed column');
+          } else if (!hasProcessed) {
+            // Neither column exists, add processed
+            await db.run('ALTER TABLE articles ADD COLUMN processed INTEGER DEFAULT 0');
+            logger.info('Added processed column');
+          } else {
+            logger.info('Processed column already exists');
+          }
+        }
       }
     ];
   }

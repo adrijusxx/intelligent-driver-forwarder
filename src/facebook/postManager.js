@@ -18,17 +18,24 @@ class PostManager {
       const readyPosts = await FacebookPost.getReadyToPost() || [];
       logger.info('Processing posts', { count: readyPosts.length });
       
+      let processed = 0;
+      let failed = 0;
+      
       for (const post of readyPosts) {
         try {
           await this.publishPost(post);
           logger.info('Successfully published post', { postId: post.id });
+          processed++;
         } catch (error) {
           logger.error('Failed to process post', { 
             postId: post.id, 
             error: error.message 
           });
+          failed++;
         }
       }
+      
+      return { processed, failed, total: readyPosts.length };
     } catch (error) {
       logger.error('Failed to process scheduled posts', { 
         error: error.message 

@@ -273,7 +273,7 @@ class CronJobs {
     try {
       const results = await this.postManager.processScheduledPosts();
       
-      if (results.processed > 0) {
+      if (results && results.processed > 0) {
         logger.info('Post publishing completed', results);
       }
     } catch (error) {
