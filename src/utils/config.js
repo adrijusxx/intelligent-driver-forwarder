@@ -1,8 +1,12 @@
 const config = require('config');
 const path = require('path');
+const fs = require('fs');
 
 // Load environment variables
 require('dotenv').config();
+
+// Configuration file paths
+const CONFIG_FILE = path.resolve(__dirname, '../../config/default.json');
 
 /**
  * Get configuration value with environment variable override
@@ -79,8 +83,45 @@ function getAll() {
   };
 }
 
+/**
+ * Set configuration value and persist to file
+ * @param {string} key - Configuration key
+ * @param {*} value - Value to set
+ */
+function set(key, value) {
+  try {
+    // Read current config
+    const configData = JSON.parse(fs.readFileSync(CONFIG_FILE, 'utf8'));
+    
+    // Update the value using the key path
+    const keyParts = key.split('.');
+    let current = configData;
+    
+    for (let i = 0; i < keyParts.length - 1; i++) {
+      if (!current[keyParts[i]]) {
+        current[keyParts[i]] = {};
+      }
+      current = current[keyParts[i]];
+    }
+    
+    current[keyParts[keyParts.length - 1]] = value;
+
+    // Write back to file
+    fs.writeFileSync(CONFIG_FILE, JSON.stringify(configData, null, 2));
+    
+    // Update runtime config
+    process.env[key.replace(/\./g, '_').toUpperCase()] = value;
+    
+    console.log(`Configuration updated successfully: ${key}`);
+  } catch (error) {
+    console.error(`Failed to update configuration: ${key}`, error);
+    throw error;
+  }
+}
+
 module.exports = {
   get,
+  set,
   getAll,
   validateConfig
 };

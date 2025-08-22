@@ -4,7 +4,7 @@ const logger = require('../utils/logger');
 
 class FacebookGraphAPI {
   constructor() {
-    this.accessToken = configUtil.get('facebook.accessToken');
+    this.userAccessToken = configUtil.get('facebook.accessToken');
     this.pageId = configUtil.get('facebook.pageId');
     this.apiVersion = configUtil.get('facebook.apiVersion', 'v18.0');
     this.baseUrl = `https://graph.facebook.com/${this.apiVersion}`;
@@ -12,6 +12,47 @@ class FacebookGraphAPI {
     this.retryDelay = configUtil.get('facebook.retryDelay', 5000);
     this.appId = configUtil.get('facebook.appId');
     this.appSecret = configUtil.get('facebook.appSecret');
+    this.pageAccessToken = null;
+  }
+
+  async init() {
+    try {
+      // First, get the page access token using the user access token
+      const pageTokenResponse = await axios.get(`https://graph.facebook.com/${this.apiVersion}/${this.pageId}`, {
+        params: {
+          fields: 'access_token',
+          access_token: this.userAccessToken
+        }
+      });
+
+      if (!pageTokenResponse.data?.access_token) {
+        throw new Error('Failed to get page access token');
+      }
+
+      this.pageAccessToken = pageTokenResponse.data.access_token;
+
+      // Verify the page token by getting basic page info
+      const response = await axios.get(`https://graph.facebook.com/${this.apiVersion}/${this.pageId}`, {
+        params: {
+          fields: 'name,id',
+          access_token: this.pageAccessToken
+        }
+      });
+
+      if (!response.data?.id) {
+        throw new Error('Failed to verify page access token');
+      }
+
+      logger.info('Successfully verified page access token', {
+        pageName: response.data.name,
+        pageId: response.data.id
+      });
+
+      logger.info('Successfully obtained page access token');
+    } catch (error) {
+      logger.error('Failed to initialize Facebook API', { error: error.message });
+      throw error;
+    }
   }
 
   updateAccessToken(newToken) {
@@ -21,9 +62,10 @@ class FacebookGraphAPI {
 
   async exchangeToken() {
     try {
-      const response = await axios({
+      // Exchange the current token for a long-lived token
+      const longLivedResponse = await axios({
         method: 'GET',
-        url: `${this.baseUrl}/oauth/access_token`,
+        url: 'https://graph.facebook.com/v18.0/oauth/access_token',
         params: {
           grant_type: 'fb_exchange_token',
           client_id: this.appId,
@@ -32,11 +74,47 @@ class FacebookGraphAPI {
         }
       });
 
-      if (!response.data || !response.data.access_token) {
-        throw new Error('Failed to get new access token from Facebook');
+      if (!longLivedResponse.data?.access_token) {
+        throw new Error('Failed to get long-lived access token');
       }
 
-      return response.data.access_token;
+      logger.info('Successfully obtained long-lived access token');
+
+      // Get the page access token
+      const pageResponse = await axios({
+        method: 'GET',
+        url: `https://graph.facebook.com/v18.0/${this.pageId}`,
+        params: {
+          fields: 'access_token',
+          access_token: longLivedResponse.data.access_token
+        }
+      });
+
+      if (!pageResponse.data?.access_token) {
+        throw new Error('Failed to get page access token');
+      }
+
+      // Get a permanent page access token
+      const permanentResponse = await axios({
+        method: 'GET',
+        url: `https://graph.facebook.com/v18.0/${this.pageId}`,
+        params: {
+          fields: 'access_token',
+          access_token: pageResponse.data.access_token,
+          expires: 'never'
+        }
+      });
+
+      if (!permanentResponse.data?.access_token) {
+        throw new Error('Failed to get permanent page access token');
+      }
+
+      // Save the permanent token to configuration
+      this.accessToken = permanentResponse.data.access_token;
+      configUtil.set('facebook.accessToken', permanentResponse.data.access_token);
+      
+      logger.info('Successfully obtained permanent page access token');
+      return permanentResponse.data.access_token;
     } catch (error) {
       logger.error('Failed to exchange Facebook token', {
         error: error.response?.data || error.message
@@ -123,7 +201,12 @@ class FacebookGraphAPI {
    * @returns {object} Facebook response
    */
   async createTextPost(postParams) {
-    const response = await this.makeRequest('POST', `/${this.pageId}/feed`, postParams);
+    // Use the page's post endpoint with proper version
+    const response = await this.makeRequest('POST', `/v18.0/${this.pageId}/feed`, {
+      ...postParams,
+      published: true, // Ensure the post is published immediately
+      access_token: this.pageAccessToken // Use the page access token
+    });
     
     logger.info('Text post created successfully', { 
       postId: response.id 
@@ -152,7 +235,11 @@ class FacebookGraphAPI {
       };
       delete photoParams.message;
 
-      const response = await this.makeRequest('POST', `/${this.pageId}/photos`, photoParams);
+      const response = await this.makeRequest('POST', `/v18.0/${this.pageId}/photos`, {
+        ...photoParams,
+        published: true,
+        access_token: this.accessToken
+      });
       
       logger.info('Photo post created successfully', { 
         postId: response.id,
@@ -224,7 +311,16 @@ class FacebookGraphAPI {
    * @returns {object} API response
    */
   async makeRequest(method, endpoint, params = {}) {
-    const url = `${this.baseUrl}${endpoint}`;
+    // If endpoint already includes version, use it directly, otherwise prepend baseUrl
+    const url = endpoint.startsWith('/v') ? 
+      `https://graph.facebook.com${endpoint}` : 
+      `${this.baseUrl}${endpoint}`;
+      
+    // Use page access token for all requests
+    const requestParams = {
+      ...params,
+      access_token: this.pageAccessToken || this.userAccessToken
+    };
     
     for (let attempt = 1; attempt <= this.retryAttempts; attempt++) {
       try {
@@ -238,9 +334,9 @@ class FacebookGraphAPI {
         };
 
         if (method === 'GET') {
-          config.params = { ...params, access_token: this.accessToken };
+          config.params = requestParams;
         } else {
-          config.data = { ...params, access_token: this.accessToken };
+          config.data = requestParams;
           config.headers['Content-Type'] = 'application/x-www-form-urlencoded';
         }
 
@@ -270,7 +366,12 @@ class FacebookGraphAPI {
           });
           
           // Don't retry on certain errors
-          if (status === 400 || status === 403) {
+          // Handle different types of errors
+          if (data?.error?.code === 190 || data?.error?.code === 463) {
+            // Token expired or invalid - let the calling code handle it
+            throw new Error(`Token error (${data.error.code}): ${data.error.message}`);
+          } else if (status === 400 || status === 403) {
+            // Other client errors - don't retry
             throw new Error(`Facebook API error (${status}): ${data?.error?.message || 'Unknown error'}`);
           }
           
@@ -328,6 +429,26 @@ class FacebookGraphAPI {
         duration: Date.now() - startTime,
         error: error.message
       };
+    }
+  }
+
+  async testPost() {
+    try {
+      const testPost = {
+        text: "🚛 Test post from Trucking News Forwarder\n\n" +
+              "Testing our automated posting system. This post was created on " +
+              new Date().toLocaleString() + "\n\n" +
+              "#testing #trucking",
+        article_url: "https://github.com/adrijusxx/intelligent-driver-forwarder"
+      };
+
+      logger.info('Creating test post', { content: testPost });
+      const result = await this.createPost(testPost);
+      logger.info('Test post created successfully', { result });
+      return result;
+    } catch (error) {
+      logger.error('Test post failed', { error: error.message });
+      throw error;
     }
   }
 

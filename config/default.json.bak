@@ -1,6 +1,9 @@
 {
   "app": {
-    "name": "Trucking News Forwarder",
+     "facebook": {
+  "apiVersion": "v18.0",
+  "pageId": "534295833110036",
+  "accessToken": "EAAQrAsA1wosBPDqNF5TVT7pUZAvAlIzXmRKYDUfNGmQDmW3uTJadCFywdBNdWKoUo9DtKnUMFd6EHT1GzuOAvMq1ckj7IDB1DdGHOF8NZCMTAdZBUdOK1wFSN8m9AyZCTCTA2qtnxZCgpZCZC7zSMr5Kyiv8jgZAGsXHsn1TavxgQ36bmTx0qW1JWyB7NxBdVrSzz1QQklPjMnZAkbICVDBfnZCWL5uihCBZAxZBRLhfipR1jvZCq2wZDZD",me": "Trucking News Forwarder",
     "port": 3000,
     "timezone": "America/New_York"
   },
@@ -14,14 +17,14 @@
     "maxFiles": 7,
     "maxSize": "10m"
   },
-  "facebook": {
-    "apiVersion": "v18.0",
-    "pageId": "534295833110036",
-    "accessToken": "EAAQrAsA1wosBPK5HVZBFUaNhrqJd2mQtv4Nmppm6f2LxlnCZCMaEfzASMncXpdcriUqWYO9bP21BEjkWHeZAHyjdYVhSivmYIpeNY2mBuv2vbQb97QHkOei5v5YE9TT8DUyy7VcynB4pqZAxs6vu2xOCrNn9NIwYsgBFmk3OsmwGwiYmiPI5BcWZBk0nUMp9cbOoXorgzJzPWJyZC9S05FdnTxFa4Fh24TCiqZAYCZAa8Xm9BAZDZD",
-    "appId": "1173190721520267",
-    "appSecret": "f90fd5f582a74db3b857396e1b718a63",
-    "retryAttempts": "3",
-    "retryDelay": "5000"
+ "facebook": {
+  "apiVersion": "v18.0",
+  "pageId": "534295833110036",
+  "accessToken": "EAAQrAsA1wosBPEE71E9gtYhrT1Aa7NfSuO3d42kLJWe8wA8LXWzDzqazl3dbDc3ruvA3XdOfYagDheAjvnRvan2MurqjRl7ayqr7grUo4KgDTEiSIRASZChZAG2BhvsqSgBtag7WuzIXEZBrR12tTzMJwgucVsXI2HSWQ0jewm65lcklFqKkBJ32esEnoZBjGoo7tZCR0ACS6VW26DVjfdPzPzVPenUDlQshGwtTnTaF5rgZDZD",
+  "appId": "1173190721520267",
+  "appSecret": "f90fd5f582a74db3b857396e1b718a63",
+  "retryAttempts": "3",
+  "retryDelay": "5000"
   },
   "scraping": {
     "userAgent": "TruckingNewsBot/1.0",
@@ -85,9 +88,9 @@
     "minWordCount": 50
   },
   "schedule": {
-    "morning": "*/2 * * * *",
-    "afternoon": "*/4 * * * *",
-    "evening": "*/6 * * * *",
+  "morning": "*/2 * * * *",
+  "afternoon": "*/4 * * * *",
+  "evening": "*/6 * * * *",
     "enabled": true
   }
 }
