@@ -9,6 +9,7 @@
     "test": "jest",
     "setup": "node scripts/setup.js",
     "fix-db": "node fix-local-db.js",
+    "fix-db-complete": "node comprehensive-db-fix.js",
     "migrate": "node scripts/migrate.js",
     "job": "node -e \"const CronJobs = require('./src/scheduler/cronJobs'); const jobs = new CronJobs(); jobs.init().then(() => jobs.runJobManually(process.argv[2])).then(() => process.exit(0)).catch(e => { console.error(e); process.exit(1); })\"",
     "test-facebook": "node -e \"const PostManager = require('./src/facebook/postManager'); const pm = new PostManager(); pm.testConnection().then(r => console.log(JSON.stringify(r, null, 2))).catch(e => console.error(e.message));\"",
