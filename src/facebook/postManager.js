@@ -152,6 +152,45 @@ class PostManager {
       throw error;
     }
   }
+
+  /**
+   * Update engagement metrics for published posts
+   * @returns {Promise<Object>} Update results
+   */
+  async updateEngagementMetrics() {
+    try {
+      logger.debug('Starting engagement metrics update');
+      
+      // Get published posts that need metrics updates
+      const posts = await FacebookPost.getPublishedPosts();
+      
+      let updated = 0;
+      let failed = 0;
+      
+      for (const post of posts) {
+        try {
+          // Get post metrics from Facebook API
+          const metrics = await this.graphApi.getPostMetrics(post.facebook_post_id);
+          
+          // Update post with metrics
+          await FacebookPost.updateMetrics(post.id, metrics);
+          updated++;
+        } catch (error) {
+          logger.error('Failed to update metrics for post', {
+            postId: post.id,
+            facebookPostId: post.facebook_post_id,
+            error: error.message
+          });
+          failed++;
+        }
+      }
+      
+      return { updated, failed, total: posts.length };
+    } catch (error) {
+      logger.error('Failed to update engagement metrics', { error: error.message });
+      return { updated: 0, failed: 0, total: 0 };
+    }
+  }
 }
 
 module.exports = PostManager;

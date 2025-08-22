@@ -72,6 +72,27 @@ class Article {
       [id]
     );
   }
+
+  /**
+   * Get recent articles within specified hours
+   * @param {number} hours Number of hours to look back
+   * @returns {Promise<Array>} Array of recent articles
+   */
+  static async getRecent(hours = 24) {
+    try {
+      const cutoffDate = new Date(Date.now() - hours * 60 * 60 * 1000);
+      const articles = await dbAll(
+        `SELECT * FROM articles 
+         WHERE published_at >= ? OR created_at >= datetime('now', '-${hours} hours')
+         ORDER BY published_at DESC`,
+        [cutoffDate.toISOString()]
+      );
+      return articles || [];
+    } catch (error) {
+      logger.error('Error getting recent articles', { error: error.message });
+      return [];
+    }
+  }
 }
 
 class FacebookPost {
@@ -150,9 +171,123 @@ class FacebookPost {
       throw error;
     }
   }
+
+  /**
+   * Get published posts for metrics updates
+   * @returns {Promise<Array>} Array of published posts
+   */
+  static async getPublishedPosts() {
+    try {
+      const posts = await dbAll(`
+        SELECT * FROM facebook_posts 
+        WHERE processed = 1 
+        AND facebook_post_id IS NOT NULL
+        AND facebook_post_id != ''
+        ORDER BY created_at DESC
+        LIMIT 50
+      `);
+      return posts || [];
+    } catch (error) {
+      logger.error('Error getting published posts', { error: error.message });
+      return [];
+    }
+  }
+
+  /**
+   * Update post engagement metrics
+   * @param {number} id Post ID
+   * @param {object} metrics Engagement metrics
+   */
+  static async updateMetrics(id, metrics) {
+    try {
+      await dbRun(
+        'UPDATE facebook_posts SET engagement_metrics = ?, updated_at = datetime("now") WHERE id = ?',
+        [JSON.stringify(metrics), id]
+      );
+      logger.debug('Updated post metrics', { postId: id });
+    } catch (error) {
+      logger.error('Error updating post metrics', { 
+        postId: id, 
+        error: error.message 
+      });
+      throw error;
+    }
+  }
+}
+
+/**
+ * Processing Queue model for managing article processing tasks
+ */
+class ProcessingQueue {
+  /**
+   * Add item to processing queue
+   * @param {number} articleId Article ID
+   * @param {number} priority Priority level
+   * @returns {Promise} Database result
+   */
+  static async add(articleId, priority = 1) {
+    try {
+      const result = await dbRun(
+        `INSERT INTO processing_queue (article_id, priority) VALUES (?, ?)`,
+        [articleId, priority]
+      );
+      logger.debug('Added to processing queue', { articleId, priority });
+      return result;
+    } catch (error) {
+      logger.error('Error adding to processing queue', { 
+        articleId, 
+        error: error.message 
+      });
+      throw error;
+    }
+  }
+
+  /**
+   * Get next items from processing queue
+   * @param {number} limit Maximum number of items
+   * @returns {Promise<Array>} Array of queue items
+   */
+  static async getNext(limit = 10) {
+    try {
+      const items = await dbAll(
+        `SELECT * FROM processing_queue 
+         WHERE status = 'pending' 
+         ORDER BY priority DESC, created_at ASC 
+         LIMIT ?`,
+        [limit]
+      );
+      return items || [];
+    } catch (error) {
+      logger.error('Error getting next queue items', { error: error.message });
+      return [];
+    }
+  }
+
+  /**
+   * Mark queue item as processed
+   * @param {number} id Queue item ID
+   */
+  static async markAsProcessed(id) {
+    try {
+      await dbRun(
+        `UPDATE processing_queue 
+         SET status = 'processed', processed_at = datetime('now') 
+         WHERE id = ?`,
+        [id]
+      );
+      logger.debug('Marked queue item as processed', { id });
+    } catch (error) {
+      logger.error('Error marking queue item as processed', { 
+        id, 
+        error: error.message 
+      });
+      throw error;
+    }
+  }
 }
 
 module.exports = {
   Article,
-  FacebookPost
+  FacebookPost,
+  ProcessingQueue
 };

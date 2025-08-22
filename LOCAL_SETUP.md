@@ -23,7 +23,11 @@ If you're getting the error `SQLITE_ERROR: no such column: processed` when runni
 
 ## What this fixes
 
-The database fix script adds the missing `processed` column to both the `articles` and `facebook_posts` tables. This column is required for the cron jobs to track which articles and posts have been processed.
+The database fix script adds the missing columns to both the `articles` and `facebook_posts` tables:
+- `processed` column - Required for tracking which articles and posts have been processed
+- `engagement_metrics` column - Required for storing Facebook post engagement data
+
+It also ensures all required database methods are available in the Article and FacebookPost models.
 
 ## Expected Output
 

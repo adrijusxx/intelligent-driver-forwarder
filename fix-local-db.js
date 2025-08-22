@@ -63,6 +63,7 @@ const db = new sqlite3.Database(dbPath, (err) => {
             created_at TEXT DEFAULT CURRENT_TIMESTAMP,
             updated_at TEXT DEFAULT CURRENT_TIMESTAMP,
             processed INTEGER DEFAULT 0,
+            engagement_metrics TEXT,
             FOREIGN KEY (article_id) REFERENCES articles (id)
           )
         `, (err) => {
@@ -87,6 +88,7 @@ const db = new sqlite3.Database(dbPath, (err) => {
       }
       
       const hasProcessed = columns.some(col => col.name === 'processed');
+      const hasEngagementMetrics = columns.some(col => col.name === 'engagement_metrics');
       
       if (!hasProcessed) {
         console.log('➕ Adding processed column to facebook_posts table...');
@@ -96,6 +98,49 @@ const db = new sqlite3.Database(dbPath, (err) => {
             process.exit(1);
           }
           console.log('✅ Added processed column to facebook_posts table');
+          
+          // Check for engagement_metrics column after adding processed
+          if (!hasEngagementMetrics) {
+            console.log('➕ Adding engagement_metrics column to facebook_posts table...');
+            db.run("ALTER TABLE facebook_posts ADD COLUMN engagement_metrics TEXT", (err) => {
+              if (err) {
+                console.error('❌ Failed to add engagement_metrics column to facebook_posts:', err.message);
+                process.exit(1);
+              }
+              console.log('✅ Added engagement_metrics column to facebook_posts table');
+              
+              db.close((err) => {
+                if (err) {
+                  console.error('❌ Error closing database:', err.message);
+                  process.exit(1);
+                }
+                console.log('🎉 Database schema fix completed successfully!');
+                console.log('');
+                console.log('You can now run: npm start');
+                process.exit(0);
+              });
+            });
+          } else {
+            db.close((err) => {
+              if (err) {
+                console.error('❌ Error closing database:', err.message);
+                process.exit(1);
+              }
+              console.log('🎉 Database schema fix completed successfully!');
+              console.log('');
+              console.log('You can now run: npm start');
+              process.exit(0);
+            });
+          }
+        });
+      } else if (!hasEngagementMetrics) {
+        console.log('➕ Adding engagement_metrics column to facebook_posts table...');
+        db.run("ALTER TABLE facebook_posts ADD COLUMN engagement_metrics TEXT", (err) => {
+          if (err) {
+            console.error('❌ Failed to add engagement_metrics column to facebook_posts:', err.message);
+            process.exit(1);
+          }
+          console.log('✅ Added engagement_metrics column to facebook_posts table');
           
           db.close((err) => {
             if (err) {
